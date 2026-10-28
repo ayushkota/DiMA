@@ -152,3 +152,12 @@ classifier_guidance/data/*
 *.pdb
 *.zip
 outputs/*
+# project-specific
+checkpoints/
+oasubset/
+openfold_src/
+results/
+*.out
+*.backup
+dima_env_backup.yml
+data/oas/

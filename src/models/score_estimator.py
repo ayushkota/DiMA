@@ -35,6 +35,7 @@ class TransformerEncoder(nn.Module):
             emb_t: torch.Tensor,
             attention_mask: Optional[torch.FloatTensor] = None,
             x_0_self_cond: Optional[torch.Tensor] = None,
+            cond: Optional[List[torch.Tensor]] = None,
     ) -> torch.Tensor:
 
         x_input_list = []
@@ -44,6 +45,8 @@ class TransformerEncoder(nn.Module):
             x = x + self.time_layers[i](emb_t)
             if self.use_self_cond and x_0_self_cond is not None:
                 x = x + self.self_cond_layers[i](x_0_self_cond)
+            if cond is not None:
+                x = x + cond[i]
             
             x = block(
                 hidden_states=x,
@@ -56,6 +59,8 @@ class TransformerEncoder(nn.Module):
             x = x + self.time_layers[ind](emb_t)
             if self.use_self_cond and x_0_self_cond is not None:
                 x = x + self.self_cond_layers[ind](x_0_self_cond)
+            if cond is not None:
+                x = x + cond[ind]
             
             x = block(
                 hidden_states=x,
@@ -100,6 +105,7 @@ class ScoreEstimator(nn.Module):
             time_t: Optional[torch.Tensor] = None,
             attention_mask: Optional[torch.Tensor] = None,
             x_0_self_cond: Optional[torch.Tensor] = None,
+            cond: Optional[List[torch.Tensor]] = None,
     ) -> torch.Tensor:
         assert time_t is not None
         
@@ -133,6 +139,7 @@ class ScoreEstimator(nn.Module):
             attention_mask=attention_mask,
             emb_t=hidden_t,
             x_0_self_cond=x_0_self_cond,
+            cond=cond,
         )
         if self.embedding_size != self.hidden_size:
             output = self.output_projector_x_t(output)

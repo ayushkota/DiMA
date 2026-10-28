@@ -28,11 +28,12 @@ class ESM2EncoderModel(Encoder):
         esm_model = EsmForMaskedLM.from_pretrained(
             config.encoder_model_name, 
             add_cross_attention=False, 
-            is_decoder=False
+            is_decoder=False,
+            device_map="auto",
         )
 
         self.tokenizer = EsmTokenizer.from_pretrained(config.encoder_model_name)
-        self.encoder = esm_model.esm.to(device)
+        self.encoder = esm_model.esm
         
         if self.decoder_type == "transformer":
             decoder_path = self.main_config.decoder.decoder_path
@@ -66,6 +67,8 @@ class ESM2EncoderModel(Encoder):
             input_ids=tokenized_batch["input_ids"], 
             attention_mask=tokenized_batch["attention_mask"]
         ).last_hidden_state
+        # with device_map="auto" the output can sit on the last GPU of the split
+        encodings = encodings.to(self.device)
         if self.enc_normalizer is not None:
             encodings = self.enc_normalizer.normalize(encodings)
 
